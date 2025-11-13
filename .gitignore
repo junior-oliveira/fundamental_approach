@@ -1,0 +1,32 @@
+
+logs/
+_temp/
+bin/
+
+# Ignore data files
+*.csv
+*.xlsx
+*.log
+*.out
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+.ipynb_checkpoints
+# Ignore Python cache files
+__pycache__/
+*.pyc
+# Ignore virtual environment directories
+venv/
+env/
+.venv/
+.env/
+# Ignore system files
+.DS_Store
+Thumbs.db
+# Ignore IDE specific files
+.vscode/
+.idea/
+# Ignore data files
+data/
+datasets/
+# Ignore result files
+resultados/

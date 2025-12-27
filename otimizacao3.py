@@ -84,33 +84,33 @@ def salvar_resultado(resultado, modelo, lag, l, k, w, v, e, evaluator, logger):
         return False
 
 def tarefa(args):
-    l, k, w, v, lag, e, evaluator, modelo = args
+    l, k, w, v, lag, evaluator, modelo, atraso = args
     
     # Criar logger para este processo
     logger = logging.getLogger('ExperimentoLogger')
     
-    log_status(logger, "INICIANDO", modelo, lag, l, k, w, v, e)
+    log_status(logger, "INICIANDO", modelo, lag, l, k, w, v, evaluator, atraso)
     
     try:
         experimento = Experimento()
         
         # Log antes de executar
-        log_status(logger, "EXECUTANDO", modelo, lag, l, k, w, v, e, 
+        log_status(logger, "EXECUTANDO", modelo, lag, l, k, w, v, evaluator, atraso,
                    mensagem_extra="Iniciando otimização com algoritmo evolucionário")
         
         inicio_tarefa = time.time()
         # As bases serão salvas individualmente dentro do método executar()
-        resultado = experimento.executar(lag, l, k, v, w, e, evaluator, modelo)
+        resultado = experimento.executar(lag, l, k, v, w, evaluator, modelo, atraso)
         tempo_decorrido = time.time() - inicio_tarefa
         
         # Log após execução
-        log_status(logger, "CONCLUIDO", modelo, lag, l, k, w, v, e, 
+        log_status(logger, "CONCLUIDO", modelo, lag, l, k, w, v, evaluator, atraso,
                    mensagem_extra=f"Tempo: {tempo_decorrido/60:.2f} min | {len(resultado)} linhas totais")
         
         return resultado
         
     except Exception as e:
-        log_status(logger, "ERRO", modelo, lag, l, k, w, v, e, 
+        log_status(logger, "ERRO", modelo, lag, l, k, w, v, evaluator, atraso,
                    mensagem_extra=f"Exceção: {str(e)}")
         raise
 
@@ -129,9 +129,9 @@ def criar_arquivo_status(argumentos, log_filename):
         f.write("EXPERIMENTOS A EXECUTAR:\n")
         f.write("-"*80 + "\n")
         
-        for i, (l, k, w, v, lag, e, evaluator, modelo) in enumerate(argumentos, 1):
-            f.write(f"{i:3d}. Modelo: {modelo:15s} | Lag: {lag:3d} | "
-                   f"l={l:3d}, k={k}, w={w}, v={v}, e={e}\n")
+        for i, (l, k, w, v, lag, evaluator, modelo, atraso) in enumerate(argumentos, 1):
+            f.write(f"{i:3d}. Modelo: {modelo:15s} | Lag: {lag:3d} | Atraso: {atraso:2d} | "
+                   f"l={l:3d}, k={k}, w={w}, v={v}, evaluator={evaluator}\n")
     
     return status_file
 
@@ -148,18 +148,18 @@ if __name__ == '__main__':
         'l' : [280],
         'k' : [2],
         'w' : [4.0],
-        'e' : ['0.28'],
         'v' : ['WeightedVoteStrategy'],
         'lag' : [1, 30, 60, 90, 120, 150, 180, 210, 240],
         'evaluator' : ['AUC'],
+        'atrasos' : [1, 4],
         # 'modelos' : ['ECS', 'AWE', 'BLAST', 'BOLE', 'DACC', 'DWM', 'OZABAG', 
         #              'OZABAG_ADWIN', 'RCD', 'PLkNN', 'ADOB', 'OzaBoost', 'LeveragingBag']
-        'modelos' : ['NB']
+        'modelos' : ['HT']
     }
 
     # Gerando todas as combinações
     argumentos = list(product(config['l'], config['k'], config['w'], config['v'], 
-                             config['lag'], config['e'], config['evaluator'], config['modelos']))
+                             config['lag'], config['evaluator'], config['modelos'], config['atrasos']))
     
     logger.info(f"Total de experimentos: {len(argumentos)}")
     logger.info(f"CPUs disponíveis: {os.cpu_count()}")

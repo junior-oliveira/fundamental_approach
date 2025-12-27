@@ -19,9 +19,7 @@ class Experimento():
         
         with self.file_lock:
             try:
-                # Volta para o diretório principal antes de salvar
-                os.chdir('/home/jjos/profit_performance')
-                
+                              
                 # Verifica se o arquivo existe e tem conteúdo
                 arquivo_existe = os.path.exists(nome_arquivo) and os.path.getsize(nome_arquivo) > 0
                 
@@ -36,7 +34,7 @@ class Experimento():
             except Exception as e:
                 self.logger.error(f"Erro ao salvar base individual no CSV: {str(e)}")
 
-    def executar(self, lag=1, l=350, k=450, v='WeightedVoteStrategy', w=4.0, e=0.3, evaluatorOption='Basic', model='ECS'):
+    def executar(self, lag=1, l=350, k=450, v='WeightedVoteStrategy', w=4.0, evaluatorOption='Basic', model='ECS', atraso=27):
         """
             Executa um conjunto de experimentos.
 
@@ -45,8 +43,35 @@ class Experimento():
             :rtype: DataFrame
         """
         learners = {                    
-                    'NB' :  f'bayes.NaiveBayes',    
-                    
+                    'NB' :  f'bayes.NaiveBayes', 
+                    'NB_PSR' : 'bayes.NaiveBayes',
+                    'NB_S_VOL' : 'bayes.NaiveBayes',
+                    'NB_LAG_27_profit3' : 'bayes.NaiveBayes',
+                    'NB_LAG_60' : 'bayes.NaiveBayes',
+                    'NB_inv_pred' :  f'bayes.NaiveBayes', 
+                    'NBProfit' :  f'bayes.NaiveBayes', 
+                    'NBProfit2' :  f'bayes.NaiveBayes', # Pode negociar a qualquer momento
+                    'NBProfit3' :  f'bayes.NaiveBayes', # Pode negociar a qualquer momento
+                    'HT' :  f'trees.HoeffdingTree',
+                    'HT_S_VOL' :  f'trees.HoeffdingTree',
+                    'HT_LAG_60' :  f'trees.HoeffdingTree',
+                    'HT_PSR' :  f'trees.HoeffdingTree',
+                    'HT_inv_pred' :  f'trees.HoeffdingTree',
+                    'HTProfit' :  f'trees.HoeffdingTree',
+                    'HTProfit2' :  f'trees.HoeffdingTree', # Pode negociar a qualquer momento
+                    'HTProfit3' :  f'trees.HoeffdingTree', # Pode negociar a qualquer momento
+                    'ECSHT2' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 290 -k 3 -e 0.28 -m Entropy -s 10',
+                    'ECSHT3' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 290 -k 3 -e 0.4 -m Entropy -s 10',
+                    'ECSHT4' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 290 -k 3 -e 0.5 -m Entropy -s 10',
+                    'ECSHT5' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 290 -k 3 -e 0.6 -m Entropy -s 10',
+                    'ECSHT6' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 100 -k 3 -e 0.5 -m Entropy -s 10',
+                    'ECSHT7' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 400 -k 3 -e 0.5 -m Entropy -s 10',
+                    'ECSHT8' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 400 -k 3 -e 0.5 -m Entropy -s 10 -v SingleVoteStrategy',
+                    'ECSHTEspecialized' : f'meta.EntropyClassifierSelectionEspecialized -l trees.HoeffdingTree -j 40 -k 3 -e 0.5 -m Entropy -s 10',
+                    'ECSHTSingle' : f'meta.EntropyClassifierSelection -l trees.HoeffdingTree -j 290 -k 30 -e 0.1 -m Entropy -s 10 -v SingleVoteStrategy',
+                    'ECSHTSingle2' : f'meta.EntropyClassifierSelection -l bayes.NaiveBayes -j 290 -k 30 -e 0.28 -m Entropy -s 10 -v SingleVoteStrategy',
+                    'BOLE' : f'meta.BOLE',
+                    'OZABAG' : 'meta.OzaBag'
                     }
         detectores = {
             'N_DET' : 'moa.classifiers.rules.core.changedetection.NoChangeDetection',
@@ -57,13 +82,10 @@ class Experimento():
         elif evaluatorOption == 'Basic':
             evaluator = 'BasicClassificationPerformanceEvaluator'
 
-        out_file = f'/home/jjos/profit_performance/_temp/temp_{lag}_{l}_{k}_{v}_{w}_{e}_{model}.csv'
+
         cat_vol = ['fund', 'nao_fund']
         resultado = pd.DataFrame()
         
-        # Muda para o diretório do MOA
-        os.chdir('/home/jjos/profit_performance/bin/')
-
         for k in detectores:
             detector = detectores[k]
             res_modelo = pd.DataFrame()
@@ -72,9 +94,10 @@ class Experimento():
             self.logger.info(f"Modelo configurado: {model} | Configuração MOA: {modelo}")
             
             for cat in cat_vol:
-                base_path = f'/home/jjos/databases/b3/{lag}/'
+                out_file = f'/home/jjos/fundamental_approach/_temp/temp_{lag}_{model}_{cat}_{atraso}.csv'
+                base_path = f'/home/jjos/databases/b3/lags/atraso_{atraso}/{cat}/{lag}/'
                 if cat == 'nao_fund':
-                    base_path = f'/home/jjos/databases/b3/{cat}/{lag}/'
+                    base_path = f'/home/jjos/databases/b3/lags/atraso_{atraso}/{cat}/{lag}/'
                 bases_names = os.listdir(f'{base_path}') 
                 bases_names = [item for item in bases_names if len(item) == 10]
                 
@@ -93,7 +116,7 @@ class Experimento():
                     trainingPercentage = 1.0
                     
                     # Monta o argumento completo do DoTask
-                    dotask_arg = f'EvaluatePrequentialUFPE -l ({modelo}) -s {stream} -f 10000 -L {lag} -d ({out_file}) -e ({evaluator}) -T {trainingPercentage}'
+                    dotask_arg = f'EvaluatePrequentialUFPEProfit -l ({modelo}) -s {stream} -f 10000 -L {lag} -d ({out_file}) -e ({evaluator}) -T {trainingPercentage}'
 
                     self.logger.info(f'Comando DoTask: java -cp moa.jar moa.DoTask \ "{dotask_arg}"')
                     # Comando como lista de argumentos com caminho completo
@@ -103,18 +126,18 @@ class Experimento():
 
                     try:
                         # Executa o comando
-                        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd='/home/jjos/de_optimazation_64_bases/bin/')
+                        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd='/home/jjos/fundamental_approach/bin/')
 
                         df = pd.read_csv(out_file)
                         df['categoria'] = cat
                         df['modelo'] = model
                         df['base'] = base_name.replace('.arff', '')
                         df['fh'] = lag
-                        df['parametros'] = f'lag_{lag}_l_{l}_k_{k}_w_{w}_v_{v}_e_{e}'
+                        df['parametros'] = f'lag_{lag}_{model}_{cat}'
                         df['trainingPercentage'] = trainingPercentage
 
                         # Salvar imediatamente esta base no CSV do modelo
-                        self._salvar_base_individual(df, model)
+                        self._salvar_base_individual(df, f'{model}_atraso_{atraso}')
                         
                         res_modelo = pd.concat([res_modelo, df])
                         
@@ -138,7 +161,6 @@ class Experimento():
                         
             resultado = pd.concat([resultado, res_modelo])
             
-        os.chdir(f'/home/jjos/profit_performance')
         self.logger.info(f"✓ Todas as {total_bases} bases processadas para modelo: {model}, lag: {lag}")
         
         return resultado
@@ -152,5 +174,5 @@ if __name__ == '__main__':
     
     experimento = Experimento()
     resultado = experimento.executar(lag=1, l=350, k=450, v='WeightedVoteStrategy', 
-                                     w=4.0, e=0.3, evaluatorOption='Basic', model='ECS')
+                                     w=4.0, evaluatorOption='Basic', model='ECS')
     print(resultado)

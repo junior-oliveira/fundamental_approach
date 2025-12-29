@@ -154,7 +154,7 @@ if __name__ == '__main__':
         'atrasos' : [1, 4],
         # 'modelos' : ['ECS', 'AWE', 'BLAST', 'BOLE', 'DACC', 'DWM', 'OZABAG', 
         #              'OZABAG_ADWIN', 'RCD', 'PLkNN', 'ADOB', 'OzaBoost', 'LeveragingBag']
-        'modelos' : ['HT']
+        'modelos' : ['NB_everyday']
     }
 
     # Gerando todas as combinações

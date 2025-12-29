@@ -44,6 +44,7 @@ class Experimento():
         """
         learners = {                    
                     'NB' :  f'bayes.NaiveBayes', 
+                    'NB_everyday' :  f'bayes.NaiveBayes', 
                     'NB_PSR' : 'bayes.NaiveBayes',
                     'NB_S_VOL' : 'bayes.NaiveBayes',
                     'NB_LAG_27_profit3' : 'bayes.NaiveBayes',
@@ -53,6 +54,7 @@ class Experimento():
                     'NBProfit2' :  f'bayes.NaiveBayes', # Pode negociar a qualquer momento
                     'NBProfit3' :  f'bayes.NaiveBayes', # Pode negociar a qualquer momento
                     'HT' :  f'trees.HoeffdingTree',
+                    'HT_everyday' :  f'trees.HoeffdingTree',
                     'HT_S_VOL' :  f'trees.HoeffdingTree',
                     'HT_LAG_60' :  f'trees.HoeffdingTree',
                     'HT_PSR' :  f'trees.HoeffdingTree',
@@ -120,7 +122,7 @@ class Experimento():
 
                     self.logger.info(f'Comando DoTask: java -cp moa.jar moa.DoTask \ "{dotask_arg}"')
                     # Comando como lista de argumentos com caminho completo
-                    cmd = ['java', '-cp', 'moa.jar', 'moa.DoTask', dotask_arg]
+                    cmd = ['java', '-cp', 'moa_negotiate_everyday.jar', 'moa.DoTask', dotask_arg]
                     
                     self.logger.debug(f"Executando comando: {' '.join(cmd[:4])}...")
 

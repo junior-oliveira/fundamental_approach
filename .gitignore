@@ -2,12 +2,14 @@
 logs/
 _temp/
 bin/
-
+bkp/
+figuras/
 # Ignore data files
 *.csv
 *.xlsx
 *.log
 *.out
+*.txt
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 .ipynb_checkpoints

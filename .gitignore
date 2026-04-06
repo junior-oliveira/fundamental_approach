@@ -2,6 +2,8 @@
 logs/
 _temp/
 bin/
+!bin/moa.jar
+
 bkp/
 figuras/
 # Ignore data files

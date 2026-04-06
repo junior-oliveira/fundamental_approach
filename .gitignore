@@ -1,8 +1,13 @@
 
 logs/
 _temp/
-bin/
-!bin/moa.jar
+
+
+# Ignora todo o CONTEÚDO da pasta bin (o asterisco é obrigatório)
+bin/*
+
+# Abre a exceção estrita para o arquivo moa.jar
+# !bin/moa.jar
 
 bkp/
 figuras/

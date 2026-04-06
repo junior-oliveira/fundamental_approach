@@ -7,7 +7,7 @@ _temp/
 bin/*
 
 # Abre a exceção estrita para o arquivo moa.jar
-# !bin/moa.jar
+!bin/moa.jar
 
 bkp/
 figuras/
